@@ -84,7 +84,8 @@ namespace sq
         protected:
 
         bool connected;
-        std::string host, port, user, pass;
+        std::string host, port, user;
+        std::vector<unsigned char> pass;
 
         int s;
         unsigned ret, no;

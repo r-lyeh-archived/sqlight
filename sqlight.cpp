@@ -361,12 +361,12 @@ namespace {
 
 namespace
 {
-    std::vector<unsigned char> get_mysql_hash( const std::string &password, const unsigned char salt[20] )
+    std::vector<unsigned char> get_mysql_hash( const std::vector<unsigned char> &password, const unsigned char salt[20] )
     {
         // [ref] http://dev.mysql.com/doc/internals/en/authentication-method.html#packet-Authentication::Native41
         // SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
 
-        std::vector<unsigned char> hash1 = blob( SHA1( password ) );
+        std::vector<unsigned char> hash1 = password; // blob( SHA1( "password" ) );
         std::vector<unsigned char> hash2 = blob( SHA1( hash1 ) );
 
         unsigned char concat[40];
@@ -411,8 +411,6 @@ void sq::light::release() {
 
 bool sq::light::connect( const std::string &host, const std::string &port, const std::string &user, const std::string &pass )
 {
-    disconnect();
-
     unsigned _port;
 
     if( !(std::stringstream(port) >> _port) )
@@ -421,25 +419,26 @@ bool sq::light::connect( const std::string &host, const std::string &port, const
     if( user.empty() || pass.empty() || host.empty() || _port == 0 || _port >= 65536 )
         return false;
 
+    this->host = host;
+    this->port = port;
+    this->user = user;
+    this->pass = blob( SHA1( pass ) );
+
+    return reconnect();
+}
+
+bool sq::light::reconnect() {
+    disconnect();
     release();
 
     if( !acquire() )
         return false;
-
-    this->host = host;
-    this->port = port;
-    this->user = user;
-    this->pass = pass;
 
     connected = true;
     if( !test("SHOW DATABASES") )
         return connected = false;
 
     return connected = true;
-}
-
-bool sq::light::reconnect() {
-    return connect( host, port, user, pass );
 }
 
 void sq::light::disconnect() {
@@ -580,7 +579,7 @@ bool sq::light::recvs( void *userdata, void* onvalue, void* onfield, void *onsep
 
         // 4. after receiving all field infos we receive row field values. One row per Receive/Packet
         while( value  ) {
-            *txt=0; i=fields-value; std::int64_t len=1; byte g=*(byte*)p;
+            *txt=0; i=fields-value; size_t len=1; byte g=*(byte*)p;
 
             // ~net_field_length() @ libmysql.c {
                 switch(g) {
@@ -596,15 +595,42 @@ bool sq::light::recvs( void *userdata, void* onvalue, void* onfield, void *onsep
                 memcpy(&len,p,g); p+=g;
             //}
 
-            // Here you can Add support for displaying more DB types like blobs etc.
             auto &type = typ[i];
             switch( type )
             {
-                default:
+                case FIELD_TYPE_BIT:
+                case FIELD_TYPE_BLOB:
+                case FIELD_TYPE_DATE:
+                case FIELD_TYPE_DATETIME:
+                case FIELD_TYPE_DECIMAL:
+                case FIELD_TYPE_DOUBLE:
+                case FIELD_TYPE_ENUM:
+                case FIELD_TYPE_FLOAT:
+                case FIELD_TYPE_GEOMETRY:
+                case FIELD_TYPE_INT24:
+                case FIELD_TYPE_LONG:
+                case FIELD_TYPE_LONG_BLOB:
+                case FIELD_TYPE_LONGLONG:
+                case FIELD_TYPE_MEDIUM_BLOB:
+                case FIELD_TYPE_NEW_DECIMAL:
+                case FIELD_TYPE_NEWDATE:
+                case FIELD_TYPE_NULL:
+                case FIELD_TYPE_SET:
+                case FIELD_TYPE_SHORT:
+                case FIELD_TYPE_STRING:
+                case FIELD_TYPE_TIME:
+                case FIELD_TYPE_TIMESTAMP:
+                case FIELD_TYPE_TINY:
+                case FIELD_TYPE_TINY_BLOB:
+                case FIELD_TYPE_VAR_STRING:
+                case FIELD_TYPE_VARCHAR:
+                case FIELD_TYPE_YEAR:
+                default: {
                     // @todo: beware little/big endianess here!
                     if(g) memcpy(txt,p,len); txt[len]=0;
                     typedef long (*TOnValue)(void *,char*,int,int,int);  if(onvalue) ret=((TOnValue)onvalue)(userdata,txt,row,i,type);
                     break;
+                }
             }
 
             p+=len;
