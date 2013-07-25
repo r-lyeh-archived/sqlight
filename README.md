@@ -1,11 +1,13 @@
 SQLight
 =======
 
-- SQLight is a tiny MySQL client written in C++11.
-- SQLight has no big dependencies. Requires [wire](https://github.com/r-lyeh/wire) for now; will be removed.
+- SQLight is a lightweight and simple MySQL client written in C++11.
 - SQLight returns JSON documents. Document writing callback is overridable.
 - SQLight supports multi-statement queries.
 - SQLight has an optional transparent metrics interface.
+- SQLight has no dependencies. Only standard headers are required.
+- SQLight is cross-platform. Compiles under MSVC/GCC. Works on Windows/Linux.
+- SQLight is tiny. One header and one source file.
 - SQLight is based on code by Ladislav Nevery.
 - SQLight is MIT licensed.
 
@@ -50,7 +52,7 @@ int main( int argc, const char **argv )
 
     sq::light sql;
 
-    if( !sql.connect( prompt("password>"), "root", argc > 1 ? argv[1] : "locahost", "3306" ) )
+    if( !sql.connect( argc > 1 ? argv[1] : "locahost", "3306", "root", prompt("password>") ) )
         return std::cerr << "error: connection to database failed" << std::endl, -1;
 
     std::cout << "connected to db. feed me SQL queries!" << std::endl;
@@ -76,7 +78,7 @@ int main( int argc, const char **argv )
     bool reversed = true;
     std::string format = "{idx} (x{hits}) total:{total} min:{min} max:{max} avg:{avg}";
     std::string sorted_by = "{total}";
-    auto list = sq::stats::get().report( format, sorted_by, reversed );
+    auto list = sq::metrics::report( format, sorted_by, reversed );
     for( auto &line : list )
         std::cout << line << std::endl;
 

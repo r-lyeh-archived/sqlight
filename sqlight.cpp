@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include <algorithm>
+#include <deque>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -110,6 +111,19 @@
 #include "metrics.hpp"
 
 namespace {
+
+    std::deque< std::string > tokenize( const std::string &input, const std::string &delimiters ) {
+        std::string map( 256, '\0' );
+        for( auto &ch : delimiters )
+            map[ ch ] = '\1';
+        std::deque< std::string > tokens(1);
+        for( auto &ch : input ) {
+            /**/ if( !map.at(ch)          ) tokens.back().push_back( ch );
+            else if( tokens.back().size() ) tokens.push_back( std::string() );
+        }
+        while( tokens.size() && !tokens.back().size() ) tokens.pop_back();
+        return tokens;
+    }
 
     typedef uint32_t basetype;
     typedef std::vector<basetype> hash;
@@ -702,8 +716,8 @@ bool sq::light::exec( const std::string &query, sq::light::callback3 cb3, void *
         return false;
 
     auto create_index = []( const std::string &sqlcode ) {
-        auto tokens = wire::string(sqlcode).tokenize(" (");
-        return tokens.size() > 1 ? tokens.at(1) : wire::string();
+        auto tokens = tokenize(sqlcode," (");
+        return tokens.size() > 1 ? tokens.at(1) : std::string();
     };
 
     sq::metrics metrics(create_index(query));
