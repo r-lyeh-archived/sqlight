@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <deque>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -724,6 +725,8 @@ bool sq::light::test( const std::string &query )
     if( !connected )
         return false;
 
+    std::lock_guard<std::mutex> lock(mutex);
+
     no = 20;
     ret = 0;
 
@@ -745,6 +748,8 @@ bool sq::light::exec( const std::string &query, sq::light::callback3 cb3, void *
         auto tokens = tokenize(sqlcode," (");
         return tokens.size() > 1 ? tokens.at(1) : std::string();
     };
+
+    std::lock_guard<std::mutex> lock(mutex);
 
     sq::metrics metrics(create_index(query));
 

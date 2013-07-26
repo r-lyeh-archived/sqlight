@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace sq
 {
@@ -87,13 +88,13 @@ namespace sq
         std::string host, port, user;
         std::vector<unsigned char> pass;
 
-        int s;
+        int s, i;
         unsigned ret, no;
 
         std::vector<char> buf;
         char *b, *d;
 
-        int i;
+        std::mutex mutex;
 
         bool open();
         bool sends( const std::string &command );
