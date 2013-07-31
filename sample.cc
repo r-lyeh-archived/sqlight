@@ -2,7 +2,6 @@
 #include <string>
 
 #include "sqlight.hpp"
-#include "metrics.hpp"
 
 int main( int argc, const char **argv )
 {
