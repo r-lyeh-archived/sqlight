@@ -106,28 +106,6 @@ namespace sq
         void release();
     };
 
-    class stats
-    {
-    public:
-        void hit( const std::string &idx, double taken );
-
-        std::vector<std::string> list() const;
-
-        double mini( const std::string &idx ) const;
-        double maxi( const std::string &idx ) const;
-        double avg( const std::string &idx ) const;
-        double total( const std::string &idx, double div = 1 ) const;
-        size_t hits( const std::string &idx ) const;
-
-        std::vector<std::string> report( const std::string &_fmt123456, const std::string &sort_key = "{total}", bool reversed = true ) const;
-
-        static stats& get();
-
-    protected:
-        stats();
-        mutable std::map< std::string /*call*/, std::vector<double> /*hits*/ > map;
-    };
-
     class metrics
     {
     public:
