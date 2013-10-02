@@ -1,16 +1,19 @@
-// tiny mysql c++ client. based on code by Ladislav Nevery.
+// SQLight, tiny MySQL C++11 client. Based on code by Ladislav Nevery.
 // - rlyeh, 2013. MIT licensed
 
 #pragma once
 
+#include <chrono>
+#include <map>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 namespace sq
 {
-    struct light
+    class light
     {
+    public:
         enum : unsigned {
             CLIENT_LONG_PASSWORD = 1,           /* New more secure passwords */
             CLIENT_FOUND_ROWS = 2,              /* Found instead of affected rows */
@@ -82,8 +85,7 @@ namespace sq
         std::string json( const std::string &query );
         bool json( const std::string &query, std::string &result );
 
-        protected:
-
+    protected:
         bool connected;
         std::string host, port, user;
         std::vector<unsigned char> pass;
@@ -102,5 +104,27 @@ namespace sq
         bool fail( const char *error = 0, const char *title = 0 );
         bool acquire();
         void release();
+    };
+
+    class metrics
+    {
+    public:
+        explicit metrics( const std::string &index );
+
+        ~metrics();
+
+        void done();
+        void cancel();
+
+        static std::vector<std::string> report( const std::string &_fmt123456, const std::string &sort_key = "{total}", bool reversed = true );
+
+    protected:
+        metrics();
+        metrics( const metrics &other );
+        metrics &operator=( const metrics &other );
+
+        bool cancelled;
+        std::string idx;
+        std::chrono::steady_clock::time_point then;
     };
 }

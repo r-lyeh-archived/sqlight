@@ -13,20 +13,21 @@ SQLight
 
 sq::light
 ---------
-- `.connect(pass,user,host,port)` @todocument
-- `.is_connected()` @todocument
-- `.disconnect()` @todocument
-- `.json(query)` @todocument
-- `.json(query,result)` @todocument
+- `.connect(host,port,user,pass)` connect to a MySQL database
+- `.reconnect()` reconnect to database
+- `.disconnect()` disconnect from database
+- `.is_connected()` check if we are connected to database
+- `.json(query)` get JSON document with data received from SQL query
+- `.json(query,result)` get JSON document with data received from SQL query
 
 sq::light (optional)
 --------------------
-- `.test(query)` @todocument
-- `.exec(query,callback,userdata)` @todocument
+- `.test(query)` check SQL query
+- `.exec(query,callback,userdata)` call user-defined callback with data received from SQL query
 
-sq::metrics
------------
-- @todocument
+sq::metrics (optional)
+----------------------
+- This is an optional metrics interface that could be dettached from SQLight. Check usage on `sqlight.cpp` file.
 
 sample
 ------
@@ -35,7 +36,6 @@ sample
 #include <string>
 
 #include "sqlight.hpp"
-#include "metrics.hpp"
 
 int main( int argc, const char **argv )
 {
