@@ -772,6 +772,20 @@ bool sq::light::exec( const std::string &query, sq::light::callback3 cb3, void *
 }
 
 namespace {
+    std::string escape( const std::string &text )  {
+        std::string out;
+        for( auto &it : text ) {
+            /**/ if( it == '\\' ) out += "\\\\";
+            else if( it == '\n' ) out += "\\\n";
+            else if( it == '\r' ) out += "\\\r";
+            else if( it == '\t' ) out += "\\\t";
+            else if( it == '\f' ) out += "\\\f";
+            else if( it == '\b' ) out += "\\\b";
+            else if( it ==  '"' ) out += "\\\"";
+            else                  out += it;
+        }
+        return out;
+    }
     void OnJSONCb( void *userdata, int w, int h, const char **map ) {
         std::string &array = *((std::string*)userdata);
         const char **field = &map[0];
@@ -779,8 +793,8 @@ namespace {
         for( int y = 1; y < h; ++y ) {
             array += "{\n";
             for( int x = 0; x < w; ++x ) {
-                array += "\"" + std::string(*field++) + "\": ";
-                array += "\"" + std::string(*value++) + "\",\n";
+                array += "\"" + escape(std::string(*field++)) + "\": ";
+                array += "\"" + escape(std::string(*value++)) + "\",\n";
             }
             if( w > 0 ) array[array.size()-2] = ' ';
             array += "},\n";
