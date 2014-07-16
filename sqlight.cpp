@@ -113,13 +113,67 @@
 #include "sqlight.hpp"
 
 namespace {
+  // knot c&p in the future we must do it right
+        enum
+        {
+            TCP_OK = 0,
+            TCP_ERROR = -1,
+            TCP_TIMEOUT = -2
+    //      TCP_DISCONNECTED = -3,
+        };
+
+        timeval as_timeval( double seconds )
+        {
+            timeval tv;
+            tv.tv_sec = (int)(seconds);
+            tv.tv_usec = (int)((seconds - (int)(seconds)) * 1000000.0);
+            return tv;
+        }
+
+        int select( int &sockfd, double timeout )
+        {
+            // set up the file descriptor set
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(sockfd, &fds);
+
+            // set up the struct timeval for the timeout
+            timeval tv = as_timeval( timeout );
+
+            // wait until timeout or data received
+            // if  tv = {n,m}, then select() waits up to n.m seconds
+            // if  tv = {0,0}, then select() does polling
+            // if &tv =  NULL, then select() waits forever
+            int ret = SELECT(sockfd+1, &fds, NULL, NULL, &tv);
+            return ( ret == -1 ? sockfd = -1, TCP_ERROR : ret == 0 ? TCP_TIMEOUT : TCP_OK );
+        }
+
+	// We must complete socket functions, timeout socket receptions.
+	// This is just a fix and it will block if count bytes are
+	// never received
+	int recvfixed(int sockfd, void *buffer, size_t count, int flags) {
+		char *_buffer = (char*)buffer;
+		while (count) {
+			if (select(sockfd, 1)!=TCP_OK)
+				return -1;
+			int total = RECV(sockfd, _buffer, count, flags);
+			// Sometimes when the socket is closed it has unexpected behavior
+			if (total<=0)
+				return -1;
+
+			_buffer+=total;
+			count-=total;
+		}
+		return 1;
+	}
 
     std::deque< std::string > tokenize( const std::string &input, const std::string &delimiters ) {
         std::string map( 256, '\0' );
         for( auto &ch : delimiters )
             map[ ch ] = '\1';
         std::deque< std::string > tokens(1);
-        for( auto &ch : input ) {
+	// for( auto &ch : input)  doesn't behave well here
+        for( const unsigned char &ch : input ) {
             /**/ if( !map.at(ch)          ) tokens.back().push_back( ch );
             else if( tokens.back().size() ) tokens.push_back( std::string() );
         }
@@ -529,8 +583,9 @@ bool sq::light::sends( const std::string &query )
     d[4]=0x3;
     strcpy(d+5,(char*)query.c_str());
     *(int*)d=strlen(d+5)+1;
-    i=SEND(s,d,4+*(int*)d,0);
-
+    i=SEND(s,d,4+*(int*)d,MSG_NOSIGNAL);
+	if (i<0)
+		return false;
     return true;
 }
 
@@ -552,7 +607,14 @@ bool sq::light::recvs( void *userdata, void* onvalue, void* onfield, void *onsep
     char &b4 = b[4]; // status high byte
 
     while (1) {
-               rc = 0;     i=RECV(s,(char*)&no,4,0);        no&=0xffffff; // This is a bug. server sometimes don't send those 4 bytes together. will fix it
+               rc = 0;
+			   i= recvfixed(s, (char*)&no, 4, 0);
+			   // i=RECV(s,(char*)&no,4,0);
+			   no&=0xffffff; // This is a bug. server sometimes don't send those 4 bytes together. will fix it (recvfixed fix the bug)
+			   // this also helps to skip packet sequence number: http://mysql.timesoft.cc/doc/internals/en/the-packet-header.html
+			   if (i<0)
+				   return fail("connection lost");
+
         while( rc < no && (i=RECV(s,b+rc, no-rc ,0)) > 0  ) rc+=i;
 
         if(i<1) return fail("connection lost"); // Connection lost
