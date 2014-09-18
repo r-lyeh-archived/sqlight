@@ -503,8 +503,25 @@ void sq::light::disconnect() {
     connected = false;
 }
 
-bool sq::light::is_connected() const {
-    return connected;
+bool sq::light::is_connected() {
+  char buf;
+
+  if (!connected)
+    return false;
+
+  int res = recv(s, &buf, 1, MSG_PEEK | MSG_DONTWAIT);
+  if (res<0)
+    {
+      // Maybe disconnected or maybe not...
+      if (errno != EAGAIN && errno != EWOULDBLOCK)
+	connected = false;
+    }
+  else if (res==0)
+    {
+      connected = false;
+    }
+
+  return connected;
 }
 
 bool sq::light::fail( const char *error, const char *title )
