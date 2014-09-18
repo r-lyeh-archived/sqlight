@@ -75,7 +75,7 @@ namespace sq
         bool connect( const std::string &host = "localhost", const std::string &port = "3306", const std::string &user = "root", const std::string &password = "root" );
         bool reconnect();
         void disconnect();
-        bool is_connected() const;
+        bool is_connected();
 
         typedef void (*callback3) (void *userdata, int w, int h, const char **map );
 
