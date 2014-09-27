@@ -1,5 +1,5 @@
 // SQLight, tiny MySQL C++11 client. Based on code by Ladislav Nevery.
-// - rlyeh, 2013. MIT licensed
+// - rlyeh, 2013. BOOST licensed
 
 #pragma once
 

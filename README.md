@@ -9,7 +9,7 @@ SQLight
 - SQLight is cross-platform. Compiles under MSVC/GCC. Works on Windows/Linux.
 - SQLight is tiny. One header and one source file.
 - SQLight is based on code by Ladislav Nevery.
-- SQLight is MIT licensed.
+- SQLight is BOOST licensed.
 
 sq::light
 ---------
