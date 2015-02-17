@@ -1,4 +1,4 @@
-SQLight
+SQLight <a href="https://travis-ci.org/r-lyeh/sqlight"><img src="https://api.travis-ci.org/r-lyeh/sqlight.svg?branch=master" align="right" /></a>
 =======
 
 - SQLight is a lightweight and simple MySQL client written in C++11.
