@@ -19,7 +19,7 @@ int main( int argc, const char **argv )
     sq::light sql;
 
     if( !sql.connect( argc > 1 ? argv[1] : "locahost", "3306", "root", prompt("password>") ) )
-        return std::cerr << "error: connection to database failed" << std::endl, -1;
+        return std::cerr << "error: connection to database failed" << std::endl, 0;
 
     std::cout << "connected to db. feed me SQL queries!" << std::endl;
 
