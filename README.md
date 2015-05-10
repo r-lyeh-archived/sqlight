@@ -9,7 +9,7 @@ SQLight <a href="https://travis-ci.org/r-lyeh/sqlight"><img src="https://api.tra
 - SQLight is cross-platform. Compiles under MSVC/GCC. Works on Windows/Linux.
 - SQLight is tiny. One header and one source file.
 - SQLight is based on code by Ladislav Nevery.
-- SQLight is BOOST licensed.
+- SQLight is zlib/libpng licensed.
 
 sq::light
 ---------
