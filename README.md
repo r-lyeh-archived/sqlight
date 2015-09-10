@@ -11,8 +11,7 @@ SQLight <a href="https://travis-ci.org/r-lyeh/sqlight"><img src="https://api.tra
 - SQLight is based on code by Ladislav Nevery.
 - SQLight is zlib/libpng licensed.
 
-sq::light
----------
+## Public API (sq::light)
 - `.connect(host,port,user,pass)` connect to a MySQL database
 - `.reconnect()` reconnect to database
 - `.disconnect()` disconnect from database
@@ -20,17 +19,14 @@ sq::light
 - `.json(query)` get JSON document with data received from SQL query
 - `.json(query,result)` get JSON document with data received from SQL query
 
-sq::light (optional)
---------------------
+## Public API (sq::light, optional)
 - `.test(query)` check SQL query
 - `.exec(query,callback,userdata)` call user-defined callback with data received from SQL query
 
-sq::metrics (optional)
-----------------------
+## Public API (sq::metrics, optional)
 - This is an optional metrics interface that could be dettached from SQLight. Check usage on `sqlight.cpp` file.
 
-sample
-------
+## Sample
 ```c++
 #include <iostream>
 #include <string>
@@ -86,9 +82,8 @@ int main( int argc, const char **argv )
 }
 ```
 
-possible output
----------------
-```
+## Possible output
+```lisp
 user@debian:~/sqlight$ ./sqlight.out
 password>root
 connected to db. feed me SQL queries!
@@ -103,3 +98,8 @@ OK
 sqlight>.quit
 count (x1) total:0.004349 min:0.004349 max:0.004349 avg:0.004349
 ```
+
+## Changelog
+- v1.0.0 (2015/09/10)
+  - Initial semantic versioning adherence
+
